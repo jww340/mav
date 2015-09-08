@@ -24,7 +24,26 @@ def pick_val(
   #   length, return an earlier value.
   index=4):
 
-    # Dummy code -- replace this with your code.
+# Joey's Code
+# ===========
+# This is used to make the code read from right to left, and if
+# the sequence is shorter than the index it returns the value at the zero
+# location:
+    if(len(seq) > index):
+        return (seq[len(seq) - index])
+    else:
+        return seq[0]
+# This is used to handle the case when given a negative index:
+    if (index < 0):
+        return (seq[index * (-1)])
+# This is used to handle the case where the sequence is empty:
+    if (len(seq) ==0):
+        raise IndexError
+# At this point all integers have been accounted for.  Then if the index
+# is not a string raise a type error.
+    if (index != type(str)):
+        raise TypeError
+
     pass
 
 # Tests
