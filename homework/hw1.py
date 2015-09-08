@@ -23,17 +23,28 @@ def pick_val(
   #   index == -2 returns seq[2]. Again, if the list is less than index in
   #   length, return an earlier value.
   index=4):
-    # Check the length of the sequence with the asked index value
-    seqlength = len(seq)
-    myindex = index
-    # Generates a good index value if the passed value is too large.
-    if abs(myindex) > seqlength:
-        myindex = 0 - seqlength
-    # Uses the passed index value
+
+# Joey's Code
+# ===========
+# This is used to make the code read from right to left, and if
+# the sequence is shorter than the index it returns the value at the zero
+# location:
+    if(len(seq) > index):
+        return (seq[len(seq) - index])
     else:
-        myindex = 0 - index
-    value = seq[myindex]
-    return value
+        return seq[0]
+# This is used to handle the case when given a negative index:
+    if (index < 0):
+        return (seq[index * (-1)])
+# This is used to handle the case where the sequence is empty:
+    if (len(seq) ==0):
+        raise IndexError
+# At this point all integers have been accounted for.  Then if the index
+# is not a string raise a type error.
+    if (index != type(str)):
+        raise TypeError
+
+    pass
 
 # Tests
 # =====
