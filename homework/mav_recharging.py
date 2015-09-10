@@ -11,13 +11,9 @@
 #
 # Library imports
 # ===============
-# For the core code.
 from threading import Thread, Lock
-# For testing.
 from time import sleep
 from Queue import Queue
-from threading import ThreadError
-import pytest
 #
 # A simple enumerate I like, taken from one of the snippet on `stackoverflow
 # <http://stackoverflow.com/questions/36932/how-can-i-represent-an-enum-in-python>`_.
@@ -58,25 +54,46 @@ class MAV(Thread):
       # Any extra args.
       **kwargs):
 
-        # Before flying:
-        self._state = None
+        # Thread's init **must** be called.
+        super(MAV, self).__init__(**kwargs)
 
-        # Your code here.
+        self._left_electrode = left_electrode
+        self._right_electrode = right_electrode
+        self._fly_time_sec = fly_time_sec
+        self._charge_time_sec = charge_time_sec
+        self._state = None
+        self.running = True
 
     def run(self):
-        # Your code here.
-        #
-        # Fly while ``self.running`` is True. Update your state:
-        self._state = _MAV_STATES.Flying
-        self._state = _MAV_STATES.Waiting
-        self._state = _MAV_STATES.Charging
-        # When done flying:
+        while (self.running):
+            self._state = _MAV_STATES.Flying
+            print('{} flying.'.format(self.name))
+            sleep(self._fly_time_sec)
+
+            self._state = _MAV_STATES.Waiting
+            print('{} connecting to electrodes.'.format(self.name))
+            with self._left_electrode, self._right_electrode:
+                self._state = _MAV_STATES.Charging
+                print('{} charging...'.format(self.name))
+                sleep(self._charge_time_sec)
+
         self._state = None
+#
+# An electrode, one element in a charging station.
+class Electrode(object):
+    def __init__(self):
+        self._lock = Lock()
+
+    def __enter__(self):
+        self._lock.acquire()
+
+    def __exit__(self, type, value, tb):
+        self._lock.release()
+        return False
 #
 # Testing
 # =======
-# MockElectrode class
-# -------------------
+_LOCK_STATE = Enum( ('Locked', 'Unlocked') )
 # A testable electrode: waits until True is placed in its queue before allowing code to proceed.
 class MockElectrode(object):
     def __init__(self):
@@ -256,7 +273,27 @@ class TestElectrode(object):
 # main code
 # =========
 def main():
-    pass
+    n = 10
+    # Create n electrodes.
+    electrode_list = []
+    for i in range(n):
+        electrode_list.append(Electrode())
+
+    # Create n MAVs and launch them.
+    MAV_list = []
+    for i in range(n):
+        MAV_list.append(MAV(electrode_list[i], electrode_list[i - 1],
+                            name='MAV {}'.format(i)))
+        MAV_list[i].start()
+
+    # Let them fly some.
+    sleep(10)
+
+    # Land them all.
+    for i in range(n):
+        MAV_list[i].running = False
+    for i in range(n):
+        MAV_list[i].join()
 
 if __name__ == '__main__':
     main()
