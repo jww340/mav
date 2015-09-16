@@ -88,6 +88,16 @@ class Electrode(object):
     def __init__(self):
         self._lock = Lock()
 
+    # Access to Lock methods
+    # ----------------------
+    def acquire(self, *args, **kwargs):
+        return self._lock.acquire(*args, **kwargs)
+
+    def release(self):
+        return self._lock.release()
+
+    # Context manager
+    # ---------------
     def __enter__(self):
         self._lock.acquire()
 
