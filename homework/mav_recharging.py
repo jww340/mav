@@ -11,9 +11,13 @@
 #
 # Library imports
 # ===============
+# For the core code.
 from threading import Thread, Lock
+# For testing.
 from time import sleep
 from Queue import Queue
+from threading import ThreadError
+import pytest
 #
 # A simple enumerate I like, taken from one of the snippet on `stackoverflow
 # <http://stackoverflow.com/questions/36932/how-can-i-represent-an-enum-in-python>`_.
