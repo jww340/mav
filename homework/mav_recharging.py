@@ -93,7 +93,6 @@ class Electrode(object):
 #
 # Testing
 # =======
-_LOCK_STATE = Enum( ('Locked', 'Unlocked') )
 # A testable electrode: waits until True is placed in its queue before allowing code to proceed.
 class MockElectrode(object):
     def __init__(self):
