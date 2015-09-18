@@ -83,6 +83,8 @@ class MAV(Thread):
 
         self._state = None
 #
+# Electrode class
+# ---------------
 # An electrode, one element in a charging station.
 class Electrode(object):
     def __init__(self):
@@ -107,6 +109,8 @@ class Electrode(object):
 #
 # Testing
 # =======
+# MockElectrode class
+# -------------------
 # A testable electrode: waits until True is placed in its queue before allowing code to proceed.
 class MockElectrode(object):
     def __init__(self):
@@ -181,9 +185,6 @@ class TestLastIsDifferent(object):
 # TestMav class
 # -------------
 class TestMav(object):
-    def test_0(self):
-        assert False
-
     # Fly a set of missions, testing at all times.
     def fly_missions(self,
           # See fly_time_sec_.
