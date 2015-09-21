@@ -137,7 +137,8 @@ master_doc = 'index'
 # default, Enki will instruct Sphinx to place all Sphinx output in ``_build``;
 # this directory should therefore be excluded from the list of source files.
 exclude_patterns = ['_build',
-                    '.git']
+                    '.git'
+                    'homework/hw_grading']
 
 # `default_role <http://sphinx-doc.org/config.html#confval-default_role>`_: The
 # reST default role (used for this markup: `text`) to use for all documents.
