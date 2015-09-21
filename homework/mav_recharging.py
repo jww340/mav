@@ -103,7 +103,7 @@ class Electrode(object):
     def __enter__(self):
         self._lock.acquire()
 
-    def __exit__(self, type, value, tb):
+    def __exit__(self, exc_type, exc_value, traceback):
         self._lock.release()
         return False
 #
