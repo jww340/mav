@@ -10,6 +10,7 @@
 # -------
 import sys
 from os.path import dirname, join
+from time import sleep
 #
 # Third-party
 # -----------
@@ -19,8 +20,21 @@ sip.setapi('QString', 2)
 sip.setapi('QVariant', 2)
 
 from PyQt4.QtGui import QApplication, QDialog, QIntValidator
-from PyQt4.QtCore import QTimer
+from PyQt4.QtCore import QTimer, QThread, QObject, pyqtSignal
 from PyQt4 import uic
+#
+class DummyWorker(QObject):
+    run = pyqtSignal(float)
+
+    def __init__(self, parent):
+        # First, let the QDialog initialize itself.
+        super(DummyWorker, self).__init__()
+        self.parent = parent
+
+    def when_run(self, time_sec):
+        print("sleeping for {} seconds.".format(time_sec))
+        sleep(time_sec)
+        self.parent.hsChargeTime.setValue.emit(50)
 #
 # Implement a dialog box.
 # =======================
@@ -36,6 +50,16 @@ class MyDialog(QDialog):
         flyTimeValidator = QIntValidator(0, 99, self)
         self.leFlyTime.setValidator(flyTimeValidator)
 
+        # Create a separate thread
+        self._thread = QThread()
+        self._thread.start()
+        # Create a worker.
+        self._worker = DummyWorker(self)
+        self._worker.moveToThread(self._thread)
+        self._worker.run.connect(self._worker.when_run)
+
+
+
 ##        QTimer.singleShot(10500, self._onTimeout)
 ##        self._timer = QTimer(self)
 ##        self._timer.timeout.connect(self._onTimeout)
@@ -45,9 +69,16 @@ class MyDialog(QDialog):
 ##        self.hsFlyTime.setValue(50)
     def on_hsFlyTime_valueChanged(self, value):
         self.leFlyTime.setText(str(value))
+        self._worker.run.emit(1.5)
 
     def on_leFlyTime_editingFinished(self):
         print(self.leFlyTime.text())
+
+    def close(self):
+        super(MyDialog, self).close()
+        self._thread.quit()
+        self._thread.wait()
+        print("hi")
 #
 # Main
 # ====
