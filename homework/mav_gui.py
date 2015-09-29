@@ -21,6 +21,7 @@ sip.setapi('QString', 2)
 sip.setapi('QVariant', 2)
 
 from PyQt4.QtGui import QApplication, QDialog, QIntValidator
+from PyQt4.QtGui import QGroupBox, QRadioButton, QVBoxLayout, QHBoxLayout
 from PyQt4.QtCore import QTimer, QThread, QObject, pyqtSignal, pyqtSlot
 from PyQt4 import uic
 #
@@ -85,6 +86,20 @@ class DummyWorker(QObject):
         print("sleeping for {} seconds.".format(time_sec))
         sleep(time_sec)
         self.parent.hsChargeTime.setValue(50)
+#
+# SingleMavWidget
+# ---------------
+# A helper class to organize each MAV's status.
+class SingleMavWidget(object):
+    pass
+#
+# UncheckableRadioButton
+# ----------------------
+# A helper class to create an uncheckable radio button.
+class UncheckableRadioButton(QRadioButton):
+    def __init__(self, *args, **kwargs):
+        super(UncheckableRadioButton, self).__init__(*args, **kwargs)
+        self.setCheckable(False)
 #
 # Mav
 # ---
@@ -185,6 +200,32 @@ class MavDialog(QDialog):
         self._timer.setSingleShot(True)
         self._timer.start(3000)
 
+        # Add in status info for n MAVs.
+        assert n > 0
+        self.n = n
+        self.mavStatus = []
+        self.electrodeStatus = []
+        hl = QHBoxLayout()
+        self.wMavStatus.setLayout(hl)
+        for index in range(self.n):
+            e = UncheckableRadioButton(self)
+            self.electrodeStatus.append(e)
+            hl.addWidget(e)
+
+            # Add in a group box.
+            smw = SingleMavWidget()
+            smw.gb = QGroupBox('MAV {}'.format(index + 1), self.wMavStatus)
+            vl = QVBoxLayout()
+            smw.gb.setLayout(vl)
+            smw.rbFlying = UncheckableRadioButton('Flying', smw.gb)
+            smw.rbWaiting = UncheckableRadioButton('Waiting', smw.gb)
+            smw.rbCharging = UncheckableRadioButton('Charging', smw.gb)
+            vl.addWidget(smw.rbFlying)
+            vl.addWidget(smw.rbWaiting)
+            vl.addWidget(smw.rbCharging)
+            self.mavStatus.append(smw)
+            hl.addWidget(smw.gb)
+
     # .. _on_updateMavState:
     #
     # A standardized way for MAVs to update their status. Should be invoked
@@ -264,7 +305,7 @@ def main():
     qa = QApplication(sys.argv)
     # Construct the UI: either a `QDialog <http://doc.qt.io/qt-4.8/qdialog.html>`_
     # or a `QMainWindow <http://doc.qt.io/qt-4.8/qmainwindow.html>`_.
-    md = MavDialog(4, 0.5, 1.5)
+    md = MavDialog(int(sys.argv[1]), 0.5, 1.5)
     # The UI is hidden while it's being set up. Now that it's ready, it must be
     # manually shown.
     md.show()
