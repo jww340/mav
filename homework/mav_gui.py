@@ -20,10 +20,21 @@ sip.setapi('QString', 2)
 sip.setapi('QVariant', 2)
 
 from PyQt4.QtGui import QApplication, QDialog, QIntValidator
-from PyQt4.QtCore import QTimer, QThread, QObject, pyqtSignal
+from PyQt4.QtCore import QTimer, QThread, QObject, pyqtSignal, pyqtSlot
 from PyQt4 import uic
 #
+# Core code
+# =========
+# DummyWorker
+# -----------
+# An example of the use of threading. To use this:
+#
+# 1. Create a thread.
+# 2. Create a worker, then move it to the thread.
+# 3. Connect the worker's signal to the worker's routine to run.
+# 4. Emit the signal to run the worker's routine.
 class DummyWorker(QObject):
+    # Define a signal used to invoke when_run.
     run = pyqtSignal(float)
 
     def __init__(self, parent):
@@ -31,13 +42,15 @@ class DummyWorker(QObject):
         super(DummyWorker, self).__init__()
         self.parent = parent
 
+    @pyqtSlot(float)
     def when_run(self, time_sec):
         print("sleeping for {} seconds.".format(time_sec))
         sleep(time_sec)
         self.parent.hsChargeTime.setValue(50)
 #
-# Implement a dialog box.
-# =======================
+# MyDialog
+# --------
+# A dialog box to operate the MAV GUI.
 class MyDialog(QDialog):
     def __init__(self):
         # First, let the QDialog initialize itself.
@@ -58,26 +71,33 @@ class MyDialog(QDialog):
         self._worker.moveToThread(self._thread)
         self._worker.run.connect(self._worker.when_run)
 
+        # Timer examples
+        # ^^^^^^^^^^^^^^
+        # A single-shot timer. It can't be canceled.
+        QTimer.singleShot(1500, self._onTimeout)
+        # Another single-shot timer. Because it has a name, it can be canceled.
+        self._timer = QTimer(self)
+        self._timer.timeout.connect(self._onTimeout)
+        self._timer.setSingleShot(True)
+        self._timer.start(3000)
 
+    @pyqtSlot()
+    def _onTimeout(self):
+        self.hsFlyTime.setValue(50)
 
-##        QTimer.singleShot(10500, self._onTimeout)
-##        self._timer = QTimer(self)
-##        self._timer.timeout.connect(self._onTimeout)
-##        self._timer.start(1500)
-##
-##    def _onTimeout(self):
-##        self.hsFlyTime.setValue(50)
+    @pyqtSlot(int)
     def on_hsFlyTime_valueChanged(self, value):
         self.leFlyTime.setText(str(value))
         self._worker.run.emit(1.5)
 
+    @pyqtSlot()
     def on_leFlyTime_editingFinished(self):
         self.hsFlyTime.setValue(int(self.leFlyTime.text()))
 
+    # When this dialog box is closed, end the worker thread.
     def closeEvent(self, event):
         self._thread.quit()
         self._thread.wait()
-        print("hi")
         return super(MyDialog, self).closeEvent(event)
 #
 # Main
