@@ -24,7 +24,7 @@ from mav_gui import MyDialog
 # =======
 @pytest.fixture
 def myDialog(qtbot):
-     md = MyDialog(2)
+     md = MyDialog()
      md.show()
      qtbot.addWidget(md)
      return md
@@ -38,8 +38,9 @@ class TestMavGui(object):
         assert myDialog.leFlyTime.text() == '10'
 
     # Check that fly time text box changes update the slider.
-    def test_2(self, myDialog):
+    def test_2(self, myDialog, qtbot):
         myDialog.leFlyTime.setText('20')
+        qtbot.keyClicks(myDialog.leFlyTime, '\n')
         assert myDialog.hsFlyTime.value() == 20
 
     # Check that charge time slider changes update the text box.

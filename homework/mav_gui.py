@@ -72,7 +72,7 @@ class MyDialog(QDialog):
         self._worker.run.emit(1.5)
 
     def on_leFlyTime_editingFinished(self):
-        print(self.leFlyTime.text())
+        self.hsFlyTime.setValue(int(self.leFlyTime.text()))
 
     def close(self):
         super(MyDialog, self).close()
