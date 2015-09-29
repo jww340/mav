@@ -34,7 +34,7 @@ class DummyWorker(QObject):
     def when_run(self, time_sec):
         print("sleeping for {} seconds.".format(time_sec))
         sleep(time_sec)
-        self.parent.hsChargeTime.setValue.emit(50)
+        self.parent.hsChargeTime.setValue(50)
 #
 # Implement a dialog box.
 # =======================
@@ -74,11 +74,11 @@ class MyDialog(QDialog):
     def on_leFlyTime_editingFinished(self):
         self.hsFlyTime.setValue(int(self.leFlyTime.text()))
 
-    def close(self):
-        super(MyDialog, self).close()
+    def closeEvent(self, event):
         self._thread.quit()
         self._thread.wait()
         print("hi")
+        return super(MyDialog, self).closeEvent(event)
 #
 # Main
 # ====
