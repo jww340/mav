@@ -97,11 +97,12 @@ class MyDialog(QDialog):
     def on_leFlyTime_editingFinished(self):
         self.hsFlyTime.setValue(int(self.leFlyTime.text()))
 
-    # When this dialog box is closed, end the worker thread.
-    def closeEvent(self, event):
+    # Free all resources used by this class.
+    def terminate(self):
         self._thread.quit()
         self._thread.wait()
-        return super(MyDialog, self).closeEvent(event)
+        self._timer.stop()
+
 #
 # Main
 # ====
@@ -119,7 +120,8 @@ def main():
     # Main loop.
     qa.exec_()
 
-##    md._timer.stop()
+    # Terminate.
+    md.terminate()
 
 if __name__ == '__main__':
     main()
