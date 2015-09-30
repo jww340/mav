@@ -14,6 +14,7 @@ from os.path import dirname, join
 # Third-party
 # -----------
 import pytest
+from PyQt4.QtCore import Qt
 #
 # Local
 # -----
@@ -40,7 +41,8 @@ class TestMavGui(object):
     # Check that fly time text box changes update the slider.
     def test_2(self, myDialog, qtbot):
         myDialog.leFlyTime.setText('20')
-        qtbot.keyClicks(myDialog.leFlyTime, '\n')
+        # Bug: On Windows, qtbot.keyClicks(myDialog.leFlyTime, '\n') crashes.
+        qtbot.keyClick(myDialog.leFlyTime, Qt.Key_Enter)
         assert myDialog.hsFlyTime.value() == 20
 
     # Check that charge time slider changes update the text box.
@@ -59,6 +61,8 @@ class TestMavGui(object):
         qtbot.keyClicks(myDialog.leFlyTime, 'hello')
         assert myDialog.leFlyTime.text() == '30'
 
+        # Must clear the text before trying to type more text.
+        myDialog.leFlyTime.setText('')
         qtbot.keyClicks(myDialog.leFlyTime, '999')
         assert myDialog.leFlyTime.text() == '99'
 
