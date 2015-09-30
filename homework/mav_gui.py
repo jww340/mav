@@ -14,7 +14,8 @@ from time import sleep
 #
 # Third-party
 # -----------
-# Use "Pythonic" (and PyQt5-compatible) `glue classes <http://pyqt.sourceforge.net/Docs/PyQt4/incompatible_apis.html>`_. This must be done before importing from PyQt4.
+# Use "Pythonic" (and PyQt5-compatible) `glue classes <http://pyqt.sourceforge.net/Docs/PyQt4/incompatible_apis.html>`_.
+# This must be done before importing from PyQt4.
 import sip
 sip.setapi('QString', 2)
 sip.setapi('QVariant', 2)
@@ -56,7 +57,9 @@ class MyDialog(QDialog):
         # First, let the QDialog initialize itself.
         super(MyDialog, self).__init__()
 
-        # `Load <http://pyqt.sourceforge.net/Docs/PyQt4/designer.html#PyQt4.uic.loadUi>`_ in our UI. The secord parameter lods the resulting UI directly into this class.
+        # `Load <http://pyqt.sourceforge.net/Docs/PyQt4/designer.html#PyQt4.uic.loadUi>`_
+        # in our UI. The secord parameter lods the resulting UI directly into
+        # this class.
         uic.loadUi(join(dirname(__file__), 'mav_gui.ui'), self)
 
         # Only allow numbers between 0 and 99 for the lien edits.
@@ -103,11 +106,14 @@ class MyDialog(QDialog):
 # Main
 # ====
 def main():
-    # Initialize the program. A `QApplication <http://doc.qt.io/qt-4.8/qapplication.html>`_ must always be created.
+    # Initialize the program. A `QApplication <http://doc.qt.io/qt-4.8/qapplication.html>`_
+    # must always be created.
     qa = QApplication(sys.argv)
-    # Construct the UI: either a `QDialog <http://doc.qt.io/qt-4.8/qdialog.html>`_ or a `QMainWindow <http://doc.qt.io/qt-4.8/qmainwindow.html>`_.
+    # Construct the UI: either a `QDialog <http://doc.qt.io/qt-4.8/qdialog.html>`_
+    # or a `QMainWindow <http://doc.qt.io/qt-4.8/qmainwindow.html>`_.
     md = MyDialog()
-    # The UI is hidden while it's being set up. Now that it's ready, it must be manually shown.
+    # The UI is hidden while it's being set up. Now that it's ready, it must be
+    # manually shown.
     md.show()
 
     # Main loop.
