@@ -23,12 +23,23 @@ from mav_gui import MyDialog
 #
 # Testing
 # =======
-@pytest.fixture
-def myDialog(qtbot):
-     md = MyDialog()
-     md.show()
-     qtbot.addWidget(md)
-     return md
+# Use a `fixture <https://pytest.org/latest/fixture.html>`_ to:
+#
+# 1. Set up for a test, by contructing ``md``.
+# 2. Tear down after a test using a `request <https://pytest.org/latest/fixture.html#fixture-finalization-executing-teardown-code>`_
+#    object.
+# 3. Use the function scope to run setup/teardown around every test.
+@pytest.fixture(scope='function')
+def myDialog(qtbot, request):
+    # Setup.
+    md = MyDialog()
+    md.show()
+    qtbot.addWidget(md)
+
+    # Teardown.
+    request.addfinalizer(md.terminate)
+
+    return md
 
 # TestMavGui
 # ----------
