@@ -20,7 +20,7 @@ import sip
 sip.setapi('QString', 2)
 sip.setapi('QVariant', 2)
 
-from PyQt4.QtGui import QApplication, QDialog, QIntValidator
+from PyQt4.QtGui import QApplication, QDialog, QDoubleValidator
 from PyQt4.QtGui import QGroupBox, QRadioButton, QVBoxLayout, QHBoxLayout
 from PyQt4.QtCore import QTimer, QThread, QObject, pyqtSignal, pyqtSlot
 from PyQt4 import uic
@@ -86,6 +86,34 @@ class DummyWorker(QObject):
         print("sleeping for {} seconds.".format(time_sec))
         sleep(time_sec)
         self.parent.hsChargeTime.setValue(50)
+#
+# MavWorker
+# ---------
+# This object simulates a single MAV.
+class MavWorker(QObject):
+    # This causes the simulation to begin.
+    run = pyqtSignal()
+
+    def __init__(self,
+      # The MyDialog which contains the GUI.
+      parent,
+      # The index of this MAV, for use in updating the GUI.
+      index):
+
+        self._parent = parent
+        self._index = index
+
+    # Fly a series of missions.
+    def fly_mission(self):
+        self._parent.update_state()
+        sleep(self._fly_time_sec)
+
+        self._state = _MAV_STATES.Waiting
+        with self._left_electrode, self._right_electrode:
+            self._state = _MAV_STATES.Charging
+            sleep(self._charge_time_sec)
+        self.run.emit()
+
 #
 # SingleMavWidget
 # ---------------
@@ -181,12 +209,16 @@ class MavDialog(QDialog):
         uic.loadUi(join(dirname(__file__), 'mav_gui.ui'), self)
 
         # Only allow numbers between 0 and 99 for the line edits.
-        flyTimeValidator = QIntValidator(0, 99, self)
+        flyTimeValidator = QDoubleValidator(0.0, 9.9, 1, self)
+        flyTimeValidator.setNotation(QDoubleValidator.StandardNotation)
         self.leFlyTime.setValidator(flyTimeValidator)
+        chargeTimeValidator = QDoubleValidator(0.0, 9.9, 1, self)
+        chargeTimeValidator.setNotation(QDoubleValidator.StandardNotation)
+        self.leChargeTime.setValidator(chargeTimeValidator)
 
         # Example: create a separate thread
         self._thread = QThread(self)
-        self._thread.start()
+        #self._thread.start()
         # Create a worker.
         self._worker = DummyWorker(self)
 
@@ -200,21 +232,22 @@ class MavDialog(QDialog):
         self._timer.setSingleShot(True)
         self._timer.start(3000)
 
-        # Add in status info for n MAVs.
-        assert n > 0
-        self.n = n
-        self.mavStatus = []
-        self.electrodeStatus = []
+        # Add in status info GUI for numMavs MAVs.
         hl = QHBoxLayout()
         self.wMavStatus.setLayout(hl)
-        for index in range(self.n):
+        assert numMavs > 0
+        self.numMavs = numMavs
+        self.mavStatus = []
+        self.electrodeStatus = []
+        for index in range(self.numMavs):
             e = UncheckableRadioButton(self)
             self.electrodeStatus.append(e)
             hl.addWidget(e)
 
             # Add in a group box.
             smw = SingleMavWidget()
-            smw.gb = QGroupBox('MAV {}'.format(index + 1), self.wMavStatus)
+            mavName = 'MAV {}'.format(index + 1)
+            smw.gb = QGroupBox(mavName, self.wMavStatus)
             vl = QVBoxLayout()
             smw.gb.setLayout(vl)
             smw.rbFlying = UncheckableRadioButton('Flying', smw.gb)
@@ -225,6 +258,10 @@ class MavDialog(QDialog):
             vl.addWidget(smw.rbCharging)
             self.mavStatus.append(smw)
             hl.addWidget(smw.gb)
+
+            # Update the combo box.
+            self.cbSelectedMav.insertItem(index, mavName)
+
 
     # .. _on_updateMavState:
     #
@@ -245,12 +282,21 @@ class MavDialog(QDialog):
 
     @pyqtSlot(int)
     def on_hsFlyTime_valueChanged(self, value):
-        self.leFlyTime.setText(str(value))
+        self.leFlyTime.setText(str(value/10.0))
         self._worker.run.emit(1.5)
 
     @pyqtSlot()
     def on_leFlyTime_editingFinished(self):
-        self.hsFlyTime.setValue(int(self.leFlyTime.text()))
+        self.hsFlyTime.setValue(float(self.leFlyTime.text())*10.0)
+
+    @pyqtSlot(int)
+    def on_hsChargeTime_valueChanged(self, value):
+        self.leChargeTime.setText(str(value/10.0))
+        self._worker.run.emit(1.5)
+
+    @pyqtSlot()
+    def on_leChargeTime_editingFinished(self):
+        self.hsChargeTime.setValue(float(self.leChargeTime.text())*10.0)
 
     # Free all resources used by this class.
     def terminate(self):
