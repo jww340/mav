@@ -117,13 +117,16 @@ class Mav(QObject):
       #
       # Time spent charging, in seconds.
       chargeTimeSec,
+      # See mavIndex_.
+      mavIndex,
+      # The thread this object should be moved to.
+      thread_,
       # See requestCharge_.
       requestCharge,
       # See finishedCharge_.
       finishedCharge):
 
-        # To do.
-        pass
+        super(Mav, self).__init__()
 #
 # MavDialog
 # ---------
@@ -212,7 +215,7 @@ class ChargingStation(QObject):
     # .. _requestCharge:
     #
     # This signal, sent by a MAV, requests exclusive access to that MAV's charging electrodes.
-    reqeustCharge = pyqtSignal(
+    requestCharge = pyqtSignal(
       # .. _mavIndex:
       #
       # The index of the requesting MAV, from 0 to n - 1.
@@ -232,6 +235,13 @@ class ChargingStation(QObject):
       numMavs):
 
         super(ChargingStation, self).__init__(parent)
+
+        self._mav = []
+        self._thread = []
+        for index in range(numMavs):
+            self._thread.append(QThread(self))
+            self._mav.append(Mav(1.5, 0.5, index, self._thread[-1],
+                                 self.requestCharge, self.finishedCharge))
 #
 # Main
 # ====
