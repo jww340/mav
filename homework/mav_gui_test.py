@@ -3,6 +3,9 @@
 # *****************************
 # mav_gui_test.py - Unit tests.
 # *****************************
+# .. note::
+#
+#    The environment variable ``PYTEST_QT_API`` must be set to ``pyqt4v2`` (see the `requirements <https://pytest-qt.readthedocs.org/en/1.7.0/intro.html#requirements>`_) to runs these tests. For example, ``export PYTEST_QT_API=pyqt4v2`` in Linux.
 #
 # Imports
 # =======
@@ -18,7 +21,7 @@ from PyQt4.QtCore import Qt
 #
 # Local
 # -----
-from mav_gui import MyDialog
+from mav_gui import MavDialog
 #
 #
 # Testing
@@ -32,7 +35,7 @@ from mav_gui import MyDialog
 @pytest.fixture(scope='function')
 def myDialog(qtbot, request):
     # Setup.
-    md = MyDialog()
+    md = MavDialog(4)
     md.show()
     qtbot.addWidget(md)
 
