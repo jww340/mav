@@ -70,7 +70,7 @@ class TestMavGui(object):
         qtbot.keyClick(mavDialog.leChargeTime, Qt.Key_Enter)
         assert mavDialog.hsChargeTime.value() == 20
 
-    # Check that invalid strings aren't allowed in the edit boxes.
+    # Check that invalid strings aren't allowed in the fly time edit boxe.
     def test_5(self, mavDialog, qtbot):
         mavDialog.leFlyTime.setText('30')
         qtbot.keyClicks(mavDialog.leFlyTime, 'hello')
@@ -80,4 +80,15 @@ class TestMavGui(object):
         mavDialog.leFlyTime.setText('')
         qtbot.keyClicks(mavDialog.leFlyTime, '999')
         assert mavDialog.leFlyTime.text() == '99'
+
+    # Check that invalid strings aren't allowed in the edit boxes.
+    def test_6(self, mavDialog, qtbot):
+        mavDialog.leChargeTime.setText('30')
+        qtbot.keyClicks(mavDialog.leChargeTime, 'hello')
+        assert mavDialog.leChargeTime.text() == '30'
+
+        # Must clear the text before trying to type more text.
+        mavDialog.leChargeTime.setText('')
+        qtbot.keyClicks(mavDialog.leChargeTime, '999')
+        assert mavDialog.leChargeTime.text() == '99'
 
