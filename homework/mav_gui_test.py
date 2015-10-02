@@ -96,5 +96,6 @@ class TestMavGui(object):
 class TestStuff(object):
     # Check that the GUI emits signals to the MAVs.
     def test_1(self, mavDialog, qtbot):
-        with qtbot.waitSignal(mavDialog._chargingStation._mav[0].updateFlyTimeSec, raising=True):
-            mavDialog.hsChargeTime.setValue(75)
+        with qtbot.waitSignal(mavDialog._chargingStation._mav[0].updateFlyTimeSec,
+                              raising=True):
+            mavDialog.hsFlyTime.setValue(75)
