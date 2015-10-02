@@ -282,7 +282,9 @@ class MavDialog(QDialog):
 
     @pyqtSlot(int)
     def on_hsFlyTime_valueChanged(self, value):
-        self.leFlyTime.setText(str(value/10.0))
+        flyTime = value/10.0
+        self._chargingStation._mav[self.cbSelectedMav.currentIndex()].updateFlyTimeSec.emit(flyTime)
+        self.leFlyTime.setText(str(flyTime))
         self._worker.run.emit(1.5)
 
     @pyqtSlot()
@@ -291,7 +293,9 @@ class MavDialog(QDialog):
 
     @pyqtSlot(int)
     def on_hsChargeTime_valueChanged(self, value):
-        self.leChargeTime.setText(str(value/10.0))
+        chargeTime = value/10.0
+        self._chargingStation._mav[self.cbSelectedMav.currentIndex()].updateChargeTimeSec.emit(chargeTime)
+        self.leChargeTime.setText(str(chargeTime))
         self._worker.run.emit(1.5)
 
     @pyqtSlot()
@@ -335,6 +339,8 @@ class ChargingStation(QObject):
       chargeTimeSec):
 
         super(ChargingStation, self).__init__(parent)
+
+
 
         self._mav = []
         self._thread = []
