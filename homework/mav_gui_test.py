@@ -110,3 +110,24 @@ class TestMavGui1(object):
                               raising=True):
             mavDialog.hsChargeTime.setValue(mavDialog.hsChargeTime.value() + 1)
 
+    # Test that slider values stay consistent.
+    def test_2(self, mavDialog, qtbot):
+        # Check initial values set by mavDialog fixture.
+        assert mavDialog.hsFlyTime.value() == 5
+        assert mavDialog.hsChargeTime.value() == 15
+
+        # Set some new values.
+        mavDialog.hsFlyTime.setValue(15)
+        mavDialog.hsChargeTime.setValue(25)
+
+        # Check and set values on another MAV.
+        mavDialog.cbSelectedMav.setCurrentIndex(1)
+        assert mavDialog.hsFlyTime.value() == 5
+        assert mavDialog.hsChargeTime.value() == 15
+        mavDialog.hsFlyTime.setValue(35)
+        mavDialog.hsChargeTime.setValue(45)
+
+        # Check previous values.
+        assert mavDialog.hsFlyTime.value() == 15
+        assert mavDialog.hsChargeTime.value() == 25
+
