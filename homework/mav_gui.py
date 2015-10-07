@@ -54,7 +54,9 @@ class Enum(frozenset):
         if name in self:
             return name
         raise AttributeError
-
+#
+# MAV_STATES
+# ----------
 _MAV_STATES = Enum( ('Flying', 'Waiting', 'Charging') )
 #
 # DummyWorker
@@ -138,7 +140,7 @@ class MavDialog(QDialog):
     updateMavState = pyqtSignal(
       # See mavIndex_.
       int,
-      # The MAV's updated state.
+      # See MAV_STATES_.
       object)
 
     def __init__(self,
@@ -186,11 +188,12 @@ class MavDialog(QDialog):
     # .. _on_updateMavState:
     #
     # A standardized way for MAVs to update their status. Should be invoked
+    @pyqtSlot(int, object)
     def _on_updateMavState(self,
-      # The MAV's index, which ranges from 0 to n - 1, where n = the number of MAVs.
-      index,
-      # The MAV's new state.
-      state):
+      # See mavIndex_.
+      mavIndex,
+      # See MAV_STATES_.
+      mavState):
 
         # Fill this in!
         pass
@@ -224,7 +227,7 @@ class ChargingStation(QObject):
     requestCharge = pyqtSignal(
       # .. _mavIndex:
       #
-      # The index of the requesting MAV, from 0 to n - 1.
+      # The index of the requesting MAV, from 0 to numMavs - 1.
       int)
 
     # .. _finishedCharge:
