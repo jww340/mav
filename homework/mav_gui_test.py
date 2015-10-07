@@ -21,7 +21,7 @@ from PyQt4.QtCore import Qt
 #
 # Local
 # -----
-from mav_gui import MavDialog
+from mav_gui import MavDialog, _MAV_STATES
 #
 # Testing
 # =======
@@ -131,4 +131,17 @@ class TestMavGui1(object):
         mavDialog.cbSelectedMav.setCurrentIndex(0)
         assert mavDialog.hsFlyTime.value() == 15
         assert mavDialog.hsChargeTime.value() == 25
+
+    # Test that updateChargeTime sec emissions update the GUI.
+    def test_3(self, mavDialog, qtbot):
+        index = 0
+        mavDialog.updateMavState.emit(index, _MAV_STATES.Charging)
+        assert mavDialog.mavStatus[index].rbCharging.isChecked()
+
+        mavDialog.updateMavState.emit(index, _MAV_STATES.Waiting)
+        assert mavDialog.mavStatus[index].rbWaiting.isChecked()
+
+        mavDialog.updateMavState.emit(index, _MAV_STATES.Flying)
+        assert mavDialog.mavStatus[index].rbFlying.isChecked()
+
 
