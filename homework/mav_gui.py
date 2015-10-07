@@ -113,7 +113,6 @@ class MavWorker(QObject):
             self._state = _MAV_STATES.Charging
             sleep(self._charge_time_sec)
         self.run.emit()
-
 #
 # SingleMavWidget
 # ---------------
@@ -351,8 +350,6 @@ class ChargingStation(QObject):
       chargeTimeSec):
 
         super(ChargingStation, self).__init__(parent)
-
-
 
         self._mav = []
         self._thread = []
