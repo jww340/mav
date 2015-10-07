@@ -96,8 +96,8 @@ class TestMavGui(object):
 class TestMavGui1(object):
     # Check that the GUI emits signals to the MAVs.
     def test_1(self, mavDialog, qtbot):
-        self.helpTest_1(mavDialog, qtbot, 0)
-        self.helpTest_1(mavDialog, qtbot, 2)
+        for index in range(4):
+            self.helpTest_1(mavDialog, qtbot, index)
 
     # A helper function to test a given MAV index.
     def helpTest_1(self, mavDialog, qtbot, index):
@@ -132,8 +132,12 @@ class TestMavGui1(object):
         assert mavDialog.hsFlyTime.value() == 15
         assert mavDialog.hsChargeTime.value() == 25
 
-    # Test that updateChargeTime sec emissions update the GUI.
+    # Test that updateMavState emissions update the GUI.
     def test_3(self, mavDialog, qtbot):
+        for index in range(4):
+            self.helpTest_3(mavDialog, qtbot)
+
+    def helpTest_3(self, mavDialog, qtbot):
         index = 0
         mavDialog.updateMavState.emit(index, _MAV_STATES.Charging)
         assert mavDialog.mavStatus[index].rbCharging.isChecked()
