@@ -239,6 +239,8 @@ class MavDialog(QDialog):
         self.numMavs = numMavs
         self.mavStatus = []
         self.electrodeStatus = []
+        self._chargeTimeSec = [chargeTimeSec]*self.numMavs
+        self._flyTimeSec = [flyTimeSec]*self.numMavs
         for index in range(self.numMavs):
             e = UncheckableRadioButton(self)
             self.electrodeStatus.append(e)
@@ -262,6 +264,9 @@ class MavDialog(QDialog):
             # Update the combo box.
             self.cbSelectedMav.insertItem(index, mavName)
 
+        # Update GUI with parameters.
+        self.on_cbSelectedMav_currentIndexChanged(0)
+
 
     # .. _on_updateMavState:
     #
@@ -282,9 +287,10 @@ class MavDialog(QDialog):
 
     @pyqtSlot(int)
     def on_hsFlyTime_valueChanged(self, value):
-        flyTime = value/10.0
-        self._chargingStation._mav[self.cbSelectedMav.currentIndex()].updateFlyTimeSec.emit(flyTime)
-        self.leFlyTime.setText(str(flyTime))
+        flyTimeSec = value/10.0
+        self._chargingStation._mav[self.cbSelectedMav.currentIndex()].updateFlyTimeSec.emit(flyTimeSec)
+        self.leFlyTime.setText(str(flyTimeSec))
+        self._flyTimeSec[self.cbSelectedMav.currentIndex()] = flyTimeSec
         self._worker.run.emit(1.5)
 
     @pyqtSlot()
@@ -293,14 +299,20 @@ class MavDialog(QDialog):
 
     @pyqtSlot(int)
     def on_hsChargeTime_valueChanged(self, value):
-        chargeTime = value/10.0
-        self._chargingStation._mav[self.cbSelectedMav.currentIndex()].updateChargeTimeSec.emit(chargeTime)
-        self.leChargeTime.setText(str(chargeTime))
+        chargeTimeSec = value/10.0
+        self._chargingStation._mav[self.cbSelectedMav.currentIndex()].updateChargeTimeSec.emit(chargeTimeSec)
+        self.leChargeTime.setText(str(chargeTimeSec))
+        self._chargeTimeSec[self.cbSelectedMav.currentIndex()] = chargeTimeSec
         self._worker.run.emit(1.5)
 
     @pyqtSlot()
     def on_leChargeTime_editingFinished(self):
         self.hsChargeTime.setValue(float(self.leChargeTime.text())*10.0)
+
+    @pyqtSlot(int)
+    def on_cbSelectedMav_currentIndexChanged(self, index):
+        self.hsChargeTime.setValue(self._chargeTimeSec[index]*10)
+        self.hsFlyTime.setValue(self._flyTimeSec[index]*10)
 
     # Free all resources used by this class.
     def terminate(self):
