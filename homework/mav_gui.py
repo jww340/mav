@@ -261,7 +261,7 @@ def main():
     qa = QApplication(sys.argv)
     # Construct the UI: either a `QDialog <http://doc.qt.io/qt-4.8/qdialog.html>`_
     # or a `QMainWindow <http://doc.qt.io/qt-4.8/qmainwindow.html>`_.
-    md = MavDialog(4)
+    md = MavDialog(4, 0.5, 1.5)
     # The UI is hidden while it's being set up. Now that it's ready, it must be
     # manually shown.
     md.show()
