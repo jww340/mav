@@ -34,7 +34,7 @@ from mav_gui import MavDialog
 @pytest.fixture(scope='function')
 def mavDialog(qtbot, request):
     # Setup.
-    md = MavDialog(4)
+    md = MavDialog(4, 0.5, 1.5)
     md.show()
     qtbot.addWidget(md)
 
@@ -72,7 +72,7 @@ class TestMavGui(object):
     # Check that invalid strings aren't allowed in the fly time edit boxe.
     def test_5(self, mavDialog, qtbot):
         mavDialog.leFlyTime.setText('5.5')
-        qtbot.keyClicks(mavDialog.leFlyTime, 'hullo')
+        qtbot.keyClicks(mavDialog.leFlyTime, 'hello')
         assert mavDialog.leFlyTime.text() == '5.5'
 
         # Must clear the text before trying to type more text.
@@ -83,7 +83,7 @@ class TestMavGui(object):
     # Check that invalid strings aren't allowed in the edit boxes.
     def test_6(self, mavDialog, qtbot):
         mavDialog.leChargeTime.setText('6.5')
-        qtbot.keyClicks(mavDialog.leChargeTime, 'hullo')
+        qtbot.keyClicks(mavDialog.leChargeTime, 'hello')
         assert mavDialog.leChargeTime.text() == '6.5'
 
         # Must clear the text before trying to type more text.
@@ -91,11 +91,22 @@ class TestMavGui(object):
         qtbot.keyClicks(mavDialog.leChargeTime, '999')
         assert float(mavDialog.leChargeTime.text()) == 9.0
 #
-# Test?
-# -----
-class TestStuff(object):
+# TestMavGui1
+# -----------
+class TestMavGui1(object):
     # Check that the GUI emits signals to the MAVs.
     def test_1(self, mavDialog, qtbot):
-        with qtbot.waitSignal(mavDialog._chargingStation._mav[0].updateFlyTimeSec,
+        self.helpTest_1(mavDialog, qtbot, 0)
+        self.helpTest_1(mavDialog, qtbot, 2)
+
+    # A helper function to test a given MAV index.
+    def helpTest_1(self, mavDialog, qtbot, index):
+        mavDialog.cbSelectedMav.setCurrentIndex(index)
+        with qtbot.waitSignal(mavDialog._chargingStation._mav[index].updateFlyTimeSec,
                               raising=True):
-            mavDialog.hsFlyTime.setValue(75)
+            mavDialog.hsFlyTime.setValue(mavDialog.hsFlyTime.value() + 1)
+
+        with qtbot.waitSignal(mavDialog._chargingStation._mav[index].updateChargeTimeSec,
+                              raising=True):
+            mavDialog.hsChargeTime.setValue(mavDialog.hsChargeTime.value() + 1)
+
