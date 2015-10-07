@@ -37,7 +37,7 @@ from PyQt4 import uic
 #
 # * Changes to the fly time or charge time slider cause emission an updateFlyTimeSec_ or updateChargeTimeSec_ signal to the appropriate Mav_, based on the currently select Mav_ in the combo box.
 # * Changes to Mav_ state cause emission of an updateMavState_ signal.
-# * When the MavDialog_ is closed, it should terminate ChargingStation_, which should end of the Mav_ threads.
+# * When the MavDialog_ is closed, it should terminate ChargingStation_, which should end the Mav_ threads.
 #
 # Enum
 # ----
@@ -145,12 +145,18 @@ class MavDialog(QDialog):
       # .. _numMavs:
       #
       # The number of MAVs in the simulation.
-      numMavs):
+      numMavs,
+      # See _flyTimeSec.
+      flyTimeSec,
+      # See _chargeTimeSec.
+      chargeTimeSec):
+
         # First, let the QDialog initialize itself.
         super(MavDialog, self).__init__()
 
         # Create a ChargingStation to manage the MAVs.
-        self._chargingStation = ChargingStation(self, numMavs)
+        self._chargingStation = ChargingStation(self, numMavs, flyTimeSec,
+                                                chargeTimeSec)
 
         # `Load <http://pyqt.sourceforge.net/Docs/PyQt4/designer.html#PyQt4.uic.loadUi>`_
         # in our UI. The secord parameter lods the resulting UI directly into
@@ -232,7 +238,11 @@ class ChargingStation(QObject):
       # The parent of this object.
       parent,
       # See _numMavs.
-      numMavs):
+      numMavs,
+      # See _flyTimeSec.
+      flyTimeSec,
+      # See _chargeTimeSec.
+      chargeTimeSec):
 
         super(ChargingStation, self).__init__(parent)
 
@@ -240,7 +250,7 @@ class ChargingStation(QObject):
         self._thread = []
         for index in range(numMavs):
             self._thread.append(QThread(self))
-            self._mav.append(Mav(1.5, 0.5, index, self._thread[-1],
+            self._mav.append(Mav(flyTimeSec, chargeTimeSec, index, self._thread[-1],
                                  self.requestCharge, self.finishedCharge))
 #
 # Main
