@@ -128,6 +128,7 @@ class TestMavGui1(object):
         mavDialog.hsChargeTime.setValue(45)
 
         # Check previous values.
+        mavDialog.cbSelectedMav.setCurrentIndex(0)
         assert mavDialog.hsFlyTime.value() == 15
         assert mavDialog.hsChargeTime.value() == 25
 
