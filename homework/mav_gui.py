@@ -266,6 +266,7 @@ class MavDialog(QDialog):
         # Update GUI with parameters.
         self.on_cbSelectedMav_currentIndexChanged(0)
 
+        self.updateMavState.connect(self._on_updateMavState)
 
     # .. _on_updateMavState:
     #
@@ -277,8 +278,25 @@ class MavDialog(QDialog):
       # See MAV_STATES_.
       mavState):
 
-        # Fill this in!
-        pass
+        # Make only one of the radio buttons checkable, so that the user can't check a different one.
+        ms = self.mavStatus[mavIndex]
+        if mavState == _MAV_STATES.Waiting:
+            ms.rbWaiting.setCheckable(True)
+            ms.rbFlying.setCheckable(False)
+            ms.rbCharging.setCheckable(False)
+            ms.rbWaiting.setChecked(True)
+        elif mavState == _MAV_STATES.Flying:
+            ms.rbWaiting.setCheckable(False)
+            ms.rbFlying.setCheckable(True)
+            ms.rbCharging.setCheckable(False)
+            self.mavStatus[mavIndex].rbFlying.setChecked(True)
+        elif mavState == _MAV_STATES.Charging:
+            ms.rbWaiting.setCheckable(False)
+            ms.rbFlying.setCheckable(False)
+            ms.rbCharging.setCheckable(True)
+            self.mavStatus[mavIndex].rbCharging.setChecked(True)
+        else:
+            assert False
 
     @pyqtSlot()
     def _onTimeout(self):
