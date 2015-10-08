@@ -18,7 +18,10 @@ from PyQt4.QtCore import Qt
 #
 # Local
 # -----
-from mav_gui import MyDialog
+try:
+    from mav_gui import MyDialog
+except:
+    from mav_gui import MavDialog as MyDialog
 #
 #
 # Testing
@@ -32,7 +35,10 @@ from mav_gui import MyDialog
 @pytest.fixture(scope='function')
 def myDialog(qtbot, request):
     # Setup.
-    md = MyDialog()
+    try:
+        md = MyDialog(4)
+    except:
+        md = MyDialog()
     md.show()
     qtbot.addWidget(md)
 
@@ -62,8 +68,9 @@ class TestMavGui(object):
         assert myDialog.leChargeTime.text() == '10'
 
     # Check that charge time text box changes update the slider.
-    def test_4(self, myDialog):
+    def test_4(self, myDialog, qtbot):
         myDialog.leChargeTime.setText('20')
+        qtbot.keyClick(myDialog.leChargeTime, Qt.Key_Enter)
         assert myDialog.hsChargeTime.value() == 20
 
     # Check that invalid strings aren't allowed in the edit boxes.
@@ -76,4 +83,3 @@ class TestMavGui(object):
         myDialog.leFlyTime.setText('')
         qtbot.keyClicks(myDialog.leFlyTime, '999')
         assert myDialog.leFlyTime.text() == '99'
-

@@ -97,6 +97,14 @@ class MyDialog(QDialog):
     def on_leFlyTime_editingFinished(self):
         self.hsFlyTime.setValue(int(self.leFlyTime.text()))
 
+    @pyqtSlot(int)
+    def on_hsChargeTime_valueChanged(self, value):
+        self.leChargeTime.setText(str(value))
+
+    @pyqtSlot()
+    def on_leChargeTime_editingFinished(self):
+        self.hsChargeTime.setValue(int(self.leChargeTime.text()))
+
     # Free all resources used by this class.
     def terminate(self):
         self._thread.quit()
