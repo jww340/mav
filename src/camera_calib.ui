@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>295</width>
-    <height>143</height>
+    <width>439</width>
+    <height>250</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,43 +16,70 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QLabel" name="lOrig">
-      <property name="text">
-       <string>Original video</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLabel" name="lCalib">
-      <property name="text">
-       <string>Calibrated</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLabel" name="lUndistort">
-      <property name="text">
-       <string>Undistorted</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QWidget" name="widget" native="true">
-      <layout class="QVBoxLayout" name="verticalLayout">
+     <widget class="QWidget" name="wVideo" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QComboBox" name="cbWebcamResolution"/>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pbRestartCalib">
+        <widget class="QLabel" name="lOrig">
          <property name="text">
-          <string>&amp;Restart</string>
+          <string>Original video</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pbGrab">
+        <widget class="QLabel" name="lCalib">
          <property name="text">
-          <string>&amp;Grab</string>
+          <string>Calibrated</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="wControls" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QGroupBox" name="gbResolution">
+         <property name="title">
+          <string>Webcam resolution</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QComboBox" name="cbWebcamResolution"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="cbCalibration">
+         <property name="title">
+          <string>Calibration</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QPushButton" name="pbRestartCalib">
+            <property name="text">
+             <string>&amp;Restart</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbGrab">
+            <property name="text">
+             <string>&amp;Grab</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="cbUndistorted">
+         <property name="text">
+          <string>&amp;Undistorted</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -79,7 +106,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>295</width>
+     <width>439</width>
      <height>21</height>
     </rect>
    </property>

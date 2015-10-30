@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>295</width>
-    <height>143</height>
+    <height>213</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,10 +23,19 @@
      </widget>
     </item>
     <item>
-     <widget class="QWidget" name="widget" native="true">
+     <widget class="QWidget" name="wControls" native="true">
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QComboBox" name="cbWebcamResolution"/>
+        <widget class="QGroupBox" name="gbWebcamResolution">
+         <property name="title">
+          <string>Webcam resolution</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QComboBox" name="cbWebcamResolution"/>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <spacer name="verticalSpacer">
