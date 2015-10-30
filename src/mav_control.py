@@ -66,6 +66,12 @@ from mav_control_base import main
 # Must import after ``mav_control_base`` to get SIP API set
 # correctly.
 from PyQt4.QtCore import QElapsedTimer, pyqtSlot
+# For calling services wihch take no parameters: toggle
+# camera and flat trim.
+from std_srvs.srv import Empty as EmptyServiceType
+# For calling services which take parameters.
+from ardrone_autonomy.srv import CamSelect, \
+  FlightAnim, LedAnim, RecordEnable
 #
 # The class below groups together the code and data used
 # to tell the MAV what to do based on user GUI clicks.
@@ -74,6 +80,7 @@ from PyQt4.QtCore import QElapsedTimer, pyqtSlot
 # existing code in ButtonGui, which takes =care of all the
 # lower-level work (displaying video, running the GUI, etc.)
 class MavControl(ButtonGui):
+        
     def on_hsThreshold_valueChanged(self, value):
         print(value)
 
@@ -86,7 +93,23 @@ class MavControl(ButtonGui):
     def on_pbLand_pressed(self):
         print("LAND")
         self.controller.SendLand()
+        
+    def on_pbFlatTrim_pressed(self):
+        print("Flat trim")
+        self.controller.SetFlatTrim()
+        
+    def on_pbEmergency_pressed(self):
+        print("Reset")
+        self.controller.SendEmergency()
+        
+    def on_pbLED_pressed(self):
+        print("Animation #", self.dialAnimation.value())
+        self.controller.SetLedAnimation(self.dialAnimation.value(), 5, 3)
 
+    def on_pbCameraToggle_pressed(self):
+        print("Camera toggle")
+        self.controller.ToggleCamera()
+    
     def on_pbUp_pressed(self):
         print("Up")
         self.controller.SetCommand(roll=0, pitch=0,
@@ -95,6 +118,69 @@ class MavControl(ButtonGui):
 
     def on_pbUp_released(self):
         print("Up done.")
+        self.controller.hover()
+        
+    def on_pbDown_pressed(self):
+        print("Down")
+        self.controller.SetCommand(roll=0, pitch=0,
+          yaw_velocity=0, z_velocity=-0.5)
+
+    def on_pbDown_released(self):
+        print("Down done.")
+        self.controller.hover()
+        
+    def on_pbForward_pressed(self):
+        print("Forward")
+        self.controller.SetCommand(roll=0, pitch=0.5,
+          yaw_velocity=0, z_velocity=0)
+
+    def on_pbForward_released(self):
+        print("Forward done.")
+        self.controller.hover()
+        
+    def on_pbBackward_pressed(self):
+        print("Backward")
+        self.controller.SetCommand(roll=0, pitch=-0.5,
+          yaw_velocity=0, z_velocity=0)
+
+    def on_pbBackward_released(self):
+        print("Backward done.")
+        self.controller.hover()
+        
+    def on_pbLeft_pressed(self):
+        print("Left")
+        self.controller.SetCommand(roll=0.5, pitch=0,
+          yaw_velocity=0, z_velocity=0)
+
+    def on_pbLeft_released(self):
+        print("Left done.")
+        self.controller.hover()
+        
+    def on_pbRight_pressed(self):
+        print("Right")
+        self.controller.SetCommand(roll=-0.5, pitch=0,
+          yaw_velocity=0, z_velocity=0)
+
+    def on_pbRight_released(self):
+        print("Right done.")
+        self.controller.hover()
+        
+    def on_pbRotateLeft_pressed(self):
+        print("Rotate Left")
+        self.controller.SetCommand(roll=0, pitch=0,
+          yaw_velocity=0.5, z_velocity=0)
+
+    def on_pbRotateLeft_released(self):
+        print("Rotate left done.")
+        self.controller.hover()
+        
+    def on_pbRotateRight_pressed(self):
+        print("Rotate Right")
+        self.controller.SetCommand(roll=0, pitch=0,
+          yaw_velocity=-0.5, z_velocity=0)
+
+    def on_pbRotateRight_released(self):
+        print("Rotate right done.")
         self.controller.hover()
 
     @pyqtSlot(bool)
