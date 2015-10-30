@@ -43,6 +43,9 @@ import numpy as np
 from webcam_find_car import find_car
 from drone_controller import BasicDroneController
 
+from sensor_msgs.msg import Joy
+
+
 # Some Constants
 COMMAND_PERIOD = 100 #ms
 
@@ -61,10 +64,70 @@ class ButtonGui(QDialog):
         self.cv = CvBridge()
 
         self.trackingColor = np.array([1, 0, 0], dtype=np.float32)
-
 #       import cProfile
 #	self._pr = cProfile.Profile()
 
+    def callback(self, joy):
+        print("hi")
+        if joy.buttons[7] == 1:
+            print('Takeoff')
+            self.controller.SendTakeoff()
+            
+        if joy.buttons[6] == 1:
+            print('Land')
+            self.controller.SendLand()
+            
+        if joy.buttons[0] == 1:
+            print('LED')
+            self.controller.SetLedAnimation(3, 5, 3)
+            
+        if joy.buttons[1] == 1:
+            print('Flat Trim')
+            self.controller.SetFlatTrim()
+            
+        if joy.buttons[2] == 1:
+            print('Toggle Camera')
+            self.controller.ToggleCamera()
+            
+        if joy.buttons[3] == 1:
+            print('Emergency')
+            self.controller.SendEmergency()
+            
+        if joy.axes[0] >= 0.5:
+            print('Left')
+            self.controller.SetCommand(roll=0.3,pitch=0, yaw_velocity=0, z_velocity=0)
+            
+        if joy.axes[0] < -0.5:
+            print('Right')
+            self.controller.SetCommand(roll=-0.3,pitch=0, yaw_velocity=0, z_velocity=0)
+            
+        if joy.axes[1] >= 0.5:
+            print('Forward')
+            self.controller.SetCommand(roll=0,pitch=0.3, yaw_velocity=0, z_velocity=0)
+            
+        if joy.axes[1] < -0.5:
+            print('Backward')
+            self.controller.SetCommand(roll=0,pitch=-0.3, yaw_velocity=0, z_velocity=0)
+            
+        if joy.axes[3] >= 0.5:
+            print('Rotate Left')
+            self.controller.SetCommand(roll=0,pitch=0, yaw_velocity=0.3, z_velocity=0)
+            
+        if joy.axes[3] < -0.5:
+            print('Rotate Right')
+            self.controller.SetCommand(roll=0,pitch=0, yaw_velocity=-0.3, z_velocity=0)
+            
+        if joy.axes[4] >= 0.5:
+            print('Up')
+            self.controller.SetCommand(roll=0,pitch=0, yaw_velocity=0, z_velocity=0.3)
+            
+        if joy.axes[4] < -0.5:
+            print('Down')
+            self.controller.SetCommand(roll=0,pitch=0, yaw_velocity=0, z_velocity=-0.3)
+            
+        else:
+            self.controller.hover()
+            
     def videoFrame(self, image):
         self.cv_image = self.cv.imgmsg_to_cv2(image, "rgb8")
         self.cv_image = cv2.resize(self.cv_image, (self.cv_image.shape[1]/2, self.cv_image.shape[0]/2))
@@ -101,6 +164,7 @@ class ButtonGui(QDialog):
 
 class RosVideo(QObject):
     videoFrame = pyqtSignal(Image)
+    xboxInput = pyqtSignal(Joy)
 
     def __init__(self):
         QObject.__init__(self)
@@ -108,7 +172,7 @@ class RosVideo(QObject):
     def run(self):
         self.sub = rospy.Subscriber('/ardrone/image_raw',
           Image, self.videoFrame.emit, queue_size=1)
-
+        self.sub1 = rospy.Subscriber('joy', Joy, self.xboxInput.emit, queue_size = 1)
 
 # Setup the application
 def main(gui=ButtonGui):
@@ -121,6 +185,7 @@ def main(gui=ButtonGui):
 
     rv = RosVideo()
     rv.videoFrame.connect(window.videoFrame)
+    rv.xboxInput.connect(window.callback)
     rv.run()
 
     # executes the QT application
