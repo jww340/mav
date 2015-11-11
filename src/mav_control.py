@@ -197,12 +197,11 @@ class MavControl(ButtonGui):
             # Create a timer for use in ``fly()``.
             self.elapsedTimer = QElapsedTimer()
         
-        elif not checked:
+        #Emergency Exit
+        else:
             self.controller.SendLand()
         
-        else:
-            # Return to a hover when leaving auto mode.
-            self.controller.hover()
+    
         
     # This is only called when the Auto checkbox is checked.
     def fly(self,
@@ -242,6 +241,8 @@ class MavControl(ButtonGui):
             # Don't send any commands until we're flying.
             # So, wait 5 seconds then go to the next state.
             if self.elapsedTimer.elapsed() >= 5000:
+                # Approach the target
+                # --------------------
                 if (cont_area < 8500 and x_center < 125 and x_center >= 0):
                     #Fly Left
                     self.updateAutoLabel('Fly Left')
@@ -253,7 +254,7 @@ class MavControl(ButtonGui):
                     self.controller.SetCommand(roll=-0.0625, pitch=0.0625, yaw_velocity=0, z_velocity=0)
                     
                 elif (cont_area < 8500 and x_center >= 125 and x_center <= 175):
-                    #flys forward
+                    #Flys Forward
                     self.updateAutoLabel('Fly Forward')
                     self.controller.SetCommand(roll=0, pitch=0.0625, yaw_velocity=0, z_velocity=0)
                 
@@ -263,44 +264,35 @@ class MavControl(ButtonGui):
                     self.controller.SetCommand(roll=0, pitch=0, yaw_velocity=-0.5, z_velocity=0)
                 
                 else:
-                    #flys UP
+                    #Flys UP
                     self.controller.SetCommand(roll=0, pitch=0, yaw_velocity=0, z_velocity=0.5)
                     self.state = 3
-                
+        
         elif self.state == 3:
+            # Fly up and over the target
+            # --------------------------
             self.updateAutoLabel('Fly Up')
             if (cont_area == 0):
                 self.elapsedTimer.restart()
                 self.state = 4
         
         elif self.state == 4:
-                #Fly Forward
-                self.updateAutoLabel('Get over it {}'.format(self.elapsedTimer.elapsed()))
-                self.controller.SetCommand(roll=0, pitch=0.0625, yaw_velocity=0, z_velocity=0.0)
-                if self.elapsedTimer.elapsed() >= 5000:
-                    self.state = 5
+            #Fly Forward State
+            #----------------
+            self.updateAutoLabel('Get over it {}'.format(self.elapsedTimer.elapsed()))
+            self.controller.SetCommand(roll=0, pitch=0.0625, yaw_velocity=0, z_velocity=0.0)
+            if self.elapsedTimer.elapsed() >= 5000:
+                self.state = 5
         
         elif self.state == 5:
-            # ...your ideas...
+            # Landing state
+            # -------------
             self.updateAutoLabel('Landing')
             self.controller.SendLand()
             self.cbAuto.toggle()
         else:
             self.updateAutoLabel('Unknown state! Help!')
 
-        # 1. Determine what to do by examining ``x_center``,
-        #    ``y_center``, etc.
-        #
-        # 2. Explain what your code will do:
-        #    ``self.updateAutoLabel('Flying up!')``.
-        #
-        # 3. Then do it, using something like:
-        #    ``self.controller.SetCommand(roll, pitch,
-        #    yaw_velocity, z_velocity)``, where you fill in
-        #    numbers in place of ``roll``, ``pitch``, etc.
-        #
-        # A template for your code::
-        #
         
      
 

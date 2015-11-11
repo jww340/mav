@@ -74,6 +74,14 @@ class ButtonGui(QDialog):
         self.flipLeft_state = 0
         self.flipRight_state = 0
         self.area = 0
+        self.BUTTON_A = 0
+        self.BUTTON_B = 1
+        self.BUTTON_X = 2
+        self.BUTTON_Y = 3
+        self.BUTTON_LB = 4
+        self.BUTTON_RB = 5
+        self.BUTTON_START = 6
+        self.BUTTON_SELECT = 7
 
         self.controller = BasicDroneController()
 
@@ -91,68 +99,68 @@ class ButtonGui(QDialog):
         self.area = cont_area
     
     def callback(self, joy):
-        if self.led_state == 0 and joy.buttons[0] == 1:
+        if self.led_state == 0 and joy.buttons[self.BUTTON_A] == 1:
             print('LED')
             self.controller.SetLedAnimation(3, 5, 3)
             self.led_state = 1
             
-        if self.led_state == 1 and joy.buttons[0] == 0:
+        if self.led_state == 1 and joy.buttons[self.BUTTON_A] == 0:
             self.led_state = 0
         
-        if self.flatTrim_state == 0 and joy.buttons[1] == 1:
+        if self.flatTrim_state == 0 and joy.buttons[self.BUTTON_B] == 1:
             print('Flat Trim')
             self.controller.SetFlatTrim()
             self.flatTrim_state = 1
             
-        if self.flatTrim_state == 1 and joy.buttons[1] == 0:
+        if self.flatTrim_state == 1 and joy.buttons[self.BUTTON_B] == 0:
             self.flatTrim_state = 0
         
-        if self.toggleCamera_state == 0 and joy.buttons[2] == 1:
+        if self.toggleCamera_state == 0 and joy.buttons[self.BUTTON_X] == 1:
             print('Toggle Camera')
             self.controller.ToggleCamera()
             self.toggleCamera_state = 1
             
-        if self.toggleCamera_state == 1 and joy.buttons[2] == 0:
+        if self.toggleCamera_state == 1 and joy.buttons[self.BUTTON_X] == 0:
             self.toggleCamera_state = 0
         
-        if self.emergency_state == 0 and joy.buttons[3] == 1:
+        if self.emergency_state == 0 and joy.buttons[self.BUTTON_Y] == 1:
             print('Emergency')
             self.controller.SendEmergency()
             self.emergency_state = 1
             
-        if self.emergency_state == 1 and joy.buttons[3] == 0:
+        if self.emergency_state == 1 and joy.buttons[self.BUTTON_Y] == 0:
             self.emergency_state = 0
             
-        if self.flipLeft_state == 0 and joy.buttons[4] == 1:
+        if self.flipLeft_state == 0 and joy.buttons[self.BUTTON_LB] == 1:
             print('Flip Left')
             self.controller.SetFlightAnimation(18, 0)
             self.flipLeft_state = 1
             
-        if self.flipLeft_state == 1 and joy.buttons[4] == 0:
+        if self.flipLeft_state == 1 and joy.buttons[self.BUTTON_LB] == 0:
             self.flipLeft_state = 0
         
-        if self.flipRight_state == 0 and joy.buttons[5] == 1:
+        if self.flipRight_state == 0 and joy.buttons[self.BUTTON_RB] == 1:
             print('Flip Right')
             self.controller.SetFlightAnimation(19, 0)
             self.flipRight_state = 1
             
-        if self.flipRight_state == 1 and joy.buttons[5] == 0:
+        if self.flipRight_state == 1 and joy.buttons[self.BUTTON_RB] == 0:
             self.flipRight_state = 0
         
-        if self.land_state == 0 and joy.buttons[6] == 1:
+        if self.land_state == 0 and joy.buttons[self.BUTTON_START] == 1:
             print('Land')
             self.controller.SendLand()
             self.land_state = 1
             
-        if self.land_state == 1 and joy.buttons[6] == 0:
+        if self.land_state == 1 and joy.buttons[self.BUTTON_START] == 0:
             self.land_state = 0
         
-        if self.takeoff_state == 0 and joy.buttons[7] == 1:
+        if self.takeoff_state == 0 and joy.buttons[self.BUTTON_SELECT] == 1:
             print('Takeoff')
             self.controller.SendTakeoff()
             self.takeoff_state = 1
             
-        if self.takeoff_state == 1 and joy.buttons[7] == 0:
+        if self.takeoff_state == 1 and joy.buttons[self.BUTTON_SELECT] == 0:
             self.takeoff_state = 0
         
         if self.area > 15000:
