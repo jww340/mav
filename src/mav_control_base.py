@@ -41,7 +41,11 @@ import numpy as np
 # Local imports
 # -------------
 from webcam_find_car import find_car
+
 from drone_controller import BasicDroneController
+
+from sensor_msgs.msg import Joy
+
 
 # Some Constants
 COMMAND_PERIOD = 100 #ms
@@ -52,6 +56,25 @@ class ButtonGui(QDialog):
         # Always do Qt init first.
         QDialog.__init__(self)
 
+        self.start_state = 0
+        self.led_state = 0
+        self.flatTrim_state = 0
+        self.toggleCamera_state = 0
+        self.emergency_state = 0
+        self.land_state = 0
+        self.takeoff_state = 0
+        self.forward_state = 0
+        self.backward_state = 0
+        self.up_state = 0
+        self.down_state = 0
+        self.left_state = 0
+        self.right_state = 0
+        self.rotateLeft_state = 0
+        self.rotateRight_state = 0
+        self.flipLeft_state = 0
+        self.flipRight_state = 0
+        self.area = 0
+
         self.controller = BasicDroneController()
 
         # Set up the user interface from Designer.
@@ -61,9 +84,91 @@ class ButtonGui(QDialog):
         self.cv = CvBridge()
 
         self.trackingColor = np.array([1, 0, 0], dtype=np.float32)
-
 #       import cProfile
 #	self._pr = cProfile.Profile()
+
+    def handle(self, cont_area):
+        self.area = cont_area
+    
+    def callback(self, joy):
+        if self.led_state == 0 and joy.buttons[0] == 1:
+            print('LED')
+            self.controller.SetLedAnimation(3, 5, 3)
+            self.led_state = 1
+            
+        if self.led_state == 1 and joy.buttons[0] == 0:
+            self.led_state = 0
+        
+        if self.flatTrim_state == 0 and joy.buttons[1] == 1:
+            print('Flat Trim')
+            self.controller.SetFlatTrim()
+            self.flatTrim_state = 1
+            
+        if self.flatTrim_state == 1 and joy.buttons[1] == 0:
+            self.flatTrim_state = 0
+        
+        if self.toggleCamera_state == 0 and joy.buttons[2] == 1:
+            print('Toggle Camera')
+            self.controller.ToggleCamera()
+            self.toggleCamera_state = 1
+            
+        if self.toggleCamera_state == 1 and joy.buttons[2] == 0:
+            self.toggleCamera_state = 0
+        
+        if self.emergency_state == 0 and joy.buttons[3] == 1:
+            print('Emergency')
+            self.controller.SendEmergency()
+            self.emergency_state = 1
+            
+        if self.emergency_state == 1 and joy.buttons[3] == 0:
+            self.emergency_state = 0
+            
+        if self.flipLeft_state == 0 and joy.buttons[4] == 1:
+            print('Flip Left')
+            self.controller.SetFlightAnimation(18, 0)
+            self.flipLeft_state = 1
+            
+        if self.flipLeft_state == 1 and joy.buttons[4] == 0:
+            self.flipLeft_state = 0
+        
+        if self.flipRight_state == 0 and joy.buttons[5] == 1:
+            print('Flip Right')
+            self.controller.SetFlightAnimation(19, 0)
+            self.flipRight_state = 1
+            
+        if self.flipRight_state == 1 and joy.buttons[5] == 0:
+            self.flipRight_state = 0
+        
+        if self.land_state == 0 and joy.buttons[6] == 1:
+            print('Land')
+            self.controller.SendLand()
+            self.land_state = 1
+            
+        if self.land_state == 1 and joy.buttons[6] == 0:
+            self.land_state = 0
+        
+        if self.takeoff_state == 0 and joy.buttons[7] == 1:
+            print('Takeoff')
+            self.controller.SendTakeoff()
+            self.takeoff_state = 1
+            
+        if self.takeoff_state == 1 and joy.buttons[7] == 0:
+            self.takeoff_state = 0
+        
+        if self.area > 15000:
+            self.controller.SendLand()
+        
+        if self.area <= 15000 and (joy.axes[0] >= 0.1 or joy.axes[1] >= 0.1 or joy.axes[3] >= 0.1 or joy.axes[4] >= 0.1 or joy.axes[0] <= -0.1 or joy.axes[1] <= -0.1 or joy.axes[3] <= -0.1 or joy.axes[4] <= -0.1):
+            
+            strafe = joy.axes[0] / 2.5
+            throttle = joy.axes[1] / 2
+            rotate = joy.axes[3] / 2.5
+            vertical = joy.axes[4] / 2.5
+            self.controller.SetCommand(roll = strafe, pitch = throttle, yaw_velocity = rotate, z_velocity = vertical)
+        
+        else:
+            self.controller.SetCommand(roll = 0, pitch = 0, yaw_velocity = 0, z_velocity = 0)
+
 
     def videoFrame(self, image):
         self.cv_image = self.cv.imgmsg_to_cv2(image, "rgb8")
@@ -81,6 +186,8 @@ class ButtonGui(QDialog):
 
         x_center = center_mass[0]
         y_center = center_mass[1]
+        
+        self.handle(cont_area)
 
         if self.cbAuto.isChecked():
             self.fly(x_center, y_center, cont_area)
@@ -101,6 +208,7 @@ class ButtonGui(QDialog):
 
 class RosVideo(QObject):
     videoFrame = pyqtSignal(Image)
+    xboxInput = pyqtSignal(Joy)
 
     def __init__(self):
         QObject.__init__(self)
@@ -108,7 +216,7 @@ class RosVideo(QObject):
     def run(self):
         self.sub = rospy.Subscriber('/ardrone/image_raw',
           Image, self.videoFrame.emit, queue_size=1)
-
+        self.sub1 = rospy.Subscriber('joy', Joy, self.xboxInput.emit, queue_size = 1)
 
 # Setup the application
 def main(gui=ButtonGui):
@@ -121,6 +229,7 @@ def main(gui=ButtonGui):
 
     rv = RosVideo()
     rv.videoFrame.connect(window.videoFrame)
+    rv.xboxInput.connect(window.callback)
     rv.run()
 
     # executes the QT application

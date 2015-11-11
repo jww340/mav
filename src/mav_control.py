@@ -66,7 +66,15 @@ from mav_control_base import main
 # Must import after ``mav_control_base`` to get SIP API set
 # correctly.
 from PyQt4.QtCore import QElapsedTimer, pyqtSlot
-#
+# For calling services wihch take no parameters: toggle
+# camera and flat trim.
+from std_srvs.srv import Empty as EmptyServiceType
+# For calling services which take parameters.
+from ardrone_autonomy.srv import CamSelect, \
+  FlightAnim, LedAnim, RecordEnable
+from time import sleep
+
+count = 0
 # The class below groups together the code and data used
 # to tell the MAV what to do based on user GUI clicks.
 # ``MavControl`` is the name of the class we're defining
@@ -74,6 +82,7 @@ from PyQt4.QtCore import QElapsedTimer, pyqtSlot
 # existing code in ButtonGui, which takes =care of all the
 # lower-level work (displaying video, running the GUI, etc.)
 class MavControl(ButtonGui):
+        
     def on_hsThreshold_valueChanged(self, value):
         print(value)
 
@@ -86,7 +95,23 @@ class MavControl(ButtonGui):
     def on_pbLand_pressed(self):
         print("LAND")
         self.controller.SendLand()
+        
+    def on_pbFlatTrim_pressed(self):
+        print("Flat trim")
+        self.controller.SetFlatTrim()
+        
+    def on_pbEmergency_pressed(self):
+        print("Reset")
+        self.controller.SendEmergency()
+        
+    def on_pbLED_pressed(self):
+        print("Animation #", self.dialAnimation.value())
+        self.controller.SetLedAnimation(self.dialAnimation.value(), 5, 3)
 
+    def on_pbCameraToggle_pressed(self):
+        print("Camera toggle")
+        self.controller.ToggleCamera()
+    
     def on_pbUp_pressed(self):
         print("Up")
         self.controller.SetCommand(roll=0, pitch=0,
@@ -95,6 +120,69 @@ class MavControl(ButtonGui):
 
     def on_pbUp_released(self):
         print("Up done.")
+        self.controller.hover()
+        
+    def on_pbDown_pressed(self):
+        print("Down")
+        self.controller.SetCommand(roll=0, pitch=0,
+          yaw_velocity=0, z_velocity=-0.5)
+
+    def on_pbDown_released(self):
+        print("Down done.")
+        self.controller.hover()
+        
+    def on_pbForward_pressed(self):
+        print("Forward")
+        self.controller.SetCommand(roll=0, pitch=0.5,
+          yaw_velocity=0, z_velocity=0)
+
+    def on_pbForward_released(self):
+        print("Forward done.")
+        self.controller.hover()
+        
+    def on_pbBackward_pressed(self):
+        print("Backward")
+        self.controller.SetCommand(roll=0, pitch=-0.5,
+          yaw_velocity=0, z_velocity=0)
+
+    def on_pbBackward_released(self):
+        print("Backward done.")
+        self.controller.hover()
+        
+    def on_pbLeft_pressed(self):
+        print("Left")
+        self.controller.SetCommand(roll=0.5, pitch=0,
+          yaw_velocity=0, z_velocity=0)
+
+    def on_pbLeft_released(self):
+        print("Left done.")
+        self.controller.hover()
+        
+    def on_pbRight_pressed(self):
+        print("Right")
+        self.controller.SetCommand(roll=-0.5, pitch=0,
+          yaw_velocity=0, z_velocity=0)
+
+    def on_pbRight_released(self):
+        print("Right done.")
+        self.controller.hover()
+        
+    def on_pbRotateLeft_pressed(self):
+        print("Rotate Left")
+        self.controller.SetCommand(roll=0, pitch=0,
+          yaw_velocity=0.5, z_velocity=0)
+
+    def on_pbRotateLeft_released(self):
+        print("Rotate left done.")
+        self.controller.hover()
+        
+    def on_pbRotateRight_pressed(self):
+        print("Rotate Right")
+        self.controller.SetCommand(roll=0, pitch=0,
+          yaw_velocity=-0.5, z_velocity=0)
+
+    def on_pbRotateRight_released(self):
+        print("Rotate right done.")
         self.controller.hover()
 
     @pyqtSlot(bool)
@@ -108,10 +196,14 @@ class MavControl(ButtonGui):
             self.state = 1
             # Create a timer for use in ``fly()``.
             self.elapsedTimer = QElapsedTimer()
+        
+        elif not checked:
+            self.controller.SendLand()
+        
         else:
             # Return to a hover when leaving auto mode.
             self.controller.hover()
-
+        
     # This is only called when the Auto checkbox is checked.
     def fly(self,
       # The x coordinate of the center of the tracked area.
@@ -125,35 +217,74 @@ class MavControl(ButtonGui):
 
         # Clear the description of what this does.
         self.lbAuto.setText('')
-
+        
         # Decide what to do based on the state.
         if self.state == 1:
+            #print(cont_area)
             # Take off
             # ^^^^^^^^
             # The Auto checkbox was just checked. Take off
             # to start out mission.
             self.updateAutoLabel('Takeoff!')
-            #self.controller.SendTakeoff()
-
+            self.controller.SendTakeoff()
+          
             # Measure time from takeoff.
             self.elapsedTimer.start()
-
+        
             # Move to the next state, waiting for takeoff to
             # finish.
             self.state = 2
-
+            
         elif self.state == 2:
             # Wait until take off completed
             # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-            self.updateAutoLabel('Wait until take off completed')
+            self.updateAutoLabel('Waiting')
             # Don't send any commands until we're flying.
             # So, wait 5 seconds then go to the next state.
             if self.elapsedTimer.elapsed() >= 5000:
-                self.state = 3
-
+                if (cont_area < 8500 and x_center < 125 and x_center >= 0):
+                    #Fly Left
+                    self.updateAutoLabel('Fly Left')
+                    self.controller.SetCommand(roll=0.0625, pitch=0.0625, yaw_velocity=0, z_velocity=0)
+                    
+                elif (cont_area < 8500 and x_center > 175):
+                    #Fly Right
+                    self.updateAutoLabel('Fly Right')
+                    self.controller.SetCommand(roll=-0.0625, pitch=0.0625, yaw_velocity=0, z_velocity=0)
+                    
+                elif (cont_area < 8500 and x_center >= 125 and x_center <= 175):
+                    #flys forward
+                    self.updateAutoLabel('Fly Forward')
+                    self.controller.SetCommand(roll=0, pitch=0.0625, yaw_velocity=0, z_velocity=0)
+                
+                elif (x_center == -1):
+                    #Rotate right
+                    self.updateAutoLabel('Rotate Right')
+                    self.controller.SetCommand(roll=0, pitch=0, yaw_velocity=-0.5, z_velocity=0)
+                
+                else:
+                    #flys UP
+                    self.controller.SetCommand(roll=0, pitch=0, yaw_velocity=0, z_velocity=0.5)
+                    self.state = 3
+                
         elif self.state == 3:
+            self.updateAutoLabel('Fly Up')
+            if (cont_area == 0):
+                self.elapsedTimer.restart()
+                self.state = 4
+        
+        elif self.state == 4:
+                #Fly Forward
+                self.updateAutoLabel('Get over it {}'.format(self.elapsedTimer.elapsed()))
+                self.controller.SetCommand(roll=0, pitch=0.0625, yaw_velocity=0, z_velocity=0.0)
+                if self.elapsedTimer.elapsed() >= 5000:
+                    self.state = 5
+        
+        elif self.state == 5:
             # ...your ideas...
-            self.updateAutoLabel('State 3')
+            self.updateAutoLabel('Landing')
+            self.controller.SendLand()
+            self.cbAuto.toggle()
         else:
             self.updateAutoLabel('Unknown state! Help!')
 
@@ -170,9 +301,8 @@ class MavControl(ButtonGui):
         #
         # A template for your code::
         #
-        #    if (x_center < ???):
-        #        self.updateAutoLabel('Flying left!')
-        #        self.controller.SetCommand(0.3, 0, 0, 0)
+        
+     
 
     # Explain what the drone is doing in auto mode by
     # displaying strings telling its intentions.
